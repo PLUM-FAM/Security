@@ -1,9 +1,14 @@
 /*
-NOTES:
-2 of the 6 are all digits  breakable with dictionary : digits 1-99999999
-(QINGFANG & wakemeupwhenseptemberends & 181003) are breakable with crackstation-human-only.txt
-victorboy and lion8888 QINGFANG wakemeupwhenseptemberends
-*/ 
+ * Joel Lechman, John Bemis, Logan Davis
+ * 
+ * Computer Security Assignment 3
+ * Due March 6th 2019
+ * 
+ * All given hashes are breakable with the crackstation.txt dictionary within ~25 mins
+ * Crackstation.txt dictionary can be found at: https://crackstation.net/crackstation-wordlist-password-cracking-dictionary.htm
+ *
+ * Example run command: java LechmanBemisDavis.java <givenHashes file.txt> <dictionary file 1.txt> <dictionary file 2.txt>
+ */
 
 import java.io.BufferedReader;
 import java.math.BigInteger; 
@@ -17,32 +22,38 @@ import java.io.FileReader;
 import java.io.IOException;
 
 
-public class assignment3 { 
-
-    // Hashes to decrypt (from assignment description)
-
+public class LechmanBemisDavis3 { 
     public static ArrayList<String> hashesToDecrypt = new ArrayList<String>();
     public static ArrayList<String> dictionaryFiles = new ArrayList<String>();
-    public static int dictionaryCount;
+    public static int dictionaryCount = 0; //counter for current dictionary being used. (current index of dictionaryFiles arraylist)
     public static double startTime; //program start time
-    public static double endTime; 
+    public static double endTime;  //holder for end time (used for the breaking of each hash)
 
-/*
-* Example run command: java assignment3.java <givenHashes file> <dictionary file>
-*/
     public static void main(String args[]) throws NoSuchAlgorithmException 
 	{ 
         startTime = System.currentTimeMillis();
-        importHashes(args[0]);
-        // crackstation.txt will crack them all after ~45 mins
-        dictionaryFiles.add(args[1]); 
+        importHashes(args[0]);//import hashes from file into program.
+        dictionaryFiles.add(args[1]);  //import dictionary into program
+        //if there are multiple dictionaries given, add there rest.
+        int dictCounter =  2;
+        while(true)
+        {
+            try
+            {
+                dictionaryFiles.add(args[dictCounter]);
+                dictCounter++; 
+            }catch(ArrayIndexOutOfBoundsException e)
+            {
+                break;
+            }
+            
+        }
 
-        dictionaryCount = 0;
+        //while there are still hashes to decrypt, keep trying all dictionaries
         while(hashesToDecrypt.size() > 0)
         {
             try
             {
-                //System.out.println("--- Using dictionary " + dictionaryFiles.get(dictionaryCount) + "\n");
                 useDictionary(dictionaryFiles.get(dictionaryCount));
             }catch(IndexOutOfBoundsException e)
             {
@@ -55,7 +66,8 @@ public class assignment3 {
 
     
     /*
-        useDictionary() is separate in case future multithreading is approperate.
+    * useDictionary attempts to break the remaining hashes in the hashesToDecrypt arraylist, once at the end of the dictionary it increments
+    * the current dictionary counter and returns void.
     */
     public static void useDictionary(String dictionary)
     {
@@ -72,7 +84,7 @@ public class assignment3 {
                 if(dictionaryEntry == null)
                 {
                     dictionaryCount++;
-                    System.out.println("--- Reached the end of the dictionary " + dictionary);
+                    System.out.println("\n --- Reached the end of the dictionary " + dictionary + "\n");
                     break;
                 }
                 // calculate hash for dictionary entry
@@ -125,18 +137,18 @@ public class assignment3 {
 	{ 
 		try { 
 
-			// Static getInstance method is called with hashing MD5 
+			//Instance of MessageDigest for MD5
 			MessageDigest md = MessageDigest.getInstance("MD5"); 
 
-            // transfer into bytes
+            //transfer into bytes
 			byte[] messageDigest = md.digest(input.getBytes()); 
-
+            //into integer
 			BigInteger no = new BigInteger(1, messageDigest);
 
 			// Convert message digest into hex value 
 			String hashtext = no.toString(16); 
             while (hashtext.length() < 32) 
-            {   // padding if necessary
+            {   // padding the hash if necessary (not applicable for this assignment but could be possible for really short passwords.)
 				hashtext = "0" + hashtext;  
 			} 
 			return hashtext; 
