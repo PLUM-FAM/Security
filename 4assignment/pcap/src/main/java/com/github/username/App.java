@@ -44,9 +44,9 @@ public class App {
         System.out.println("Main start");
         final PcapHandle handle;
         try {
-            handle = Pcaps.openOffline("smallFlows.pcap", TimestampPrecision.NANO);
+            handle = Pcaps.openOffline("lbl-internal.20041004-1305.port002.dump.pcap", TimestampPrecision.NANO);
             try{
-                String filter = "tcp port 80";
+                String filter = ""; //"tcp port 80";
                 handle.setFilter(filter, BpfCompileMode.OPTIMIZE);
             } catch(NotOpenException e1)
             {
